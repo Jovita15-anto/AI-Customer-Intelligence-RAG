@@ -1,10 +1,16 @@
-# Python-generated files
+# Python
 __pycache__/
-*.py[oc]
-build/
-dist/
-wheels/
-*.egg-info
+*.pyc
+.venv/
 
-# Virtual environments
-.venv
+# Chroma vector database
+chroma_sql_rag/
+
+# Uploaded databases
+uploaded_database.db
+
+# Local SQLite database
+company.db
+
+# Environment files
+.env

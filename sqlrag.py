@@ -1,4 +1,3 @@
-
 from sqlalchemy import create_engine, text
 from langchain_community.utilities import SQLDatabase
 from langchain_ollama import ChatOllama, OllamaEmbeddings
@@ -6,23 +5,34 @@ from langchain_chroma import Chroma
 from langchain_core.documents import Document
 from sentence_transformers import SentenceTransformer, CrossEncoder
 
-engine = create_engine("sqlite:///company.db")
 
 # CONNECT LANGCHAIN TO EXISTING SQLITE DATABASE
 
-db = SQLDatabase(engine)
+engine = None
+db = None
+schema = None
 
-print("EXISTING SQLITE TABLES")
 
-tables = db.get_usable_table_names()
+def initialize_database(database_path="company.db"):
 
-print(tables)
+    global engine, db, schema
 
-print("DATABASE SCHEMA")
+    engine = create_engine(f"sqlite:///{database_path}")
+    db = SQLDatabase(engine)
 
-schema = db.get_table_info()
+    print("DATABASE CONNECTED:", database_path)
 
-print(schema)
+    print("EXISTING SQLITE TABLES")
+
+    tables = db.get_usable_table_names()
+
+    print(tables)
+
+    print("DATABASE SCHEMA")
+
+    schema = db.get_table_info()
+
+    print(schema)
 
 llm = ChatOllama(model="llama3.2:latest",temperature=0)
 
@@ -301,31 +311,19 @@ def vector_retrieval(question,k=5):
 #
 # ============================================================
 
-def reciprocal_rank_fusion(sql_results, vector_results, k=60):
+def reciprocal_rank_fusion(vector_results, k=60):
 
     fused_scores = {}
 
-    # SQL results
-    for rank, item in enumerate(sql_results, start=1):
-
-        customer_id = item["customer_id"]
-
-        if customer_id not in fused_scores:
-            fused_scores[customer_id] = 0
-
-        fused_scores[customer_id] += 1 / (k + rank)
-
-    # Vector results
     for rank, item in enumerate(vector_results, start=1):
 
-        customer_id = item["customer_id"]
+        customer_id = item["document"].metadata["customer_id"]
 
         if customer_id not in fused_scores:
             fused_scores[customer_id] = 0
 
         fused_scores[customer_id] += 1 / (k + rank)
 
-    # Sort by fused score
     ranked_ids = sorted(
         fused_scores,
         key=fused_scores.get,
@@ -611,7 +609,7 @@ def hybrid_rag(question):
     
     print("STEP 5 - CROSS ENCODER RERANKING")
     
-    ranked_candidates = rerank(question,candidates,top_k=3)
+    ranked_candidates = rerank(question,candidates,top_k=5)
 
 
     for rank, candidate in enumerate(ranked_candidates,start=1):
@@ -647,13 +645,17 @@ def hybrid_rag(question):
 #
 # It DOES NOT INSERT OR MODIFY ANY SQLite data.
 
-build_vector_index()
+if __name__ == "__main__":
 
-question = """
-What did customers complain about?
-"""
+    initialize_database("company.db")
 
-hybrid_rag(question)
+    build_vector_index()
+
+    question = """
+    Which Bangalore customers had delivery issues?
+    """
+
+    hybrid_rag(question)
 
 # OTHER EXAMPLE QUESTIONS
 
