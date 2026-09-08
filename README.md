@@ -119,10 +119,6 @@ uv sync
 ollama pull llama3.2
 ollama pull nomic-embed-text
 ```
-
-### Then add Running the Application
-
-```markdown
 ## ▶️ Running the Application
 
 Start the Streamlit application:
