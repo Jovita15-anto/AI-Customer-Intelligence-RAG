@@ -144,4 +144,6 @@ sqlite_proj/
 ├── chroma_sql_rag/
 └── README.md
 ```
+## Screenshots
+
 
