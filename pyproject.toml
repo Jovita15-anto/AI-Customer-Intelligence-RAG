@@ -1,0 +1,14 @@
+[project]
+name = "sqlite-proj"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "langchain-chroma>=1.1.0",
+    "langchain-community>=0.4.2",
+    "langchain-core>=1.6.2",
+    "langchain-ollama>=1.1.0",
+    "sentence-transformers>=6.0.1",
+    "sqlalchemy>=2.0.52",
+]
